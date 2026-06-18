@@ -55,6 +55,39 @@ async function run() {
             res.send(result);
         });
 
+        // =====================
+        // Adoption Request
+        // =====================
+
+        app.post("/adoption-requests", async (req, res) => {
+            const request = {
+                ...req.body,
+                requestedDate: new Date()
+            };
+
+            const result = await adoptionRequestsCollection.insertOne(request);
+            res.send(result);
+        });
+
+
+        app.get("/adoption-requests", async (req, res) => {
+            const result = await adoptionRequestsCollection.find().toArray();
+            res.send(result);
+        });
+
+        app.get("/adoption-requests/:email", async (req, res) => {
+            const email = req.params.email;
+
+            const result = await adoptionRequestsCollection
+                .find({ userEmail: email })
+                .toArray();
+
+            res.send(result);
+        });
+
+
+
+
 
 
 
