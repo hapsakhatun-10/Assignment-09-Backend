@@ -45,15 +45,26 @@ async function run() {
             res.send(result);
         });
 
-        app.get("/pets/:id", async (req, res) => {
-            const id = req.params.id;
+        // middleware
+        app.get("/pets/:id", (req, res, next) => {
+            const header = req.headers.authorization
+            if (header = loggedin) {
+                next();
+            }
+            else {
+                res.status(401).json({ maessage: "Unauthorized" })
+            }
 
-            const result = await petCollection.findOne({
-                _id: new ObjectId(id),
+        },
+            async (req, res) => {
+                const id = req.params.id;
+
+                const result = await petCollection.findOne({
+                    _id: new ObjectId(id),
+                });
+
+                res.send(result);
             });
-
-            res.send(result);
-        });
 
         // =====================
         // Adoption Request
@@ -79,7 +90,12 @@ async function run() {
             const email = req.params.email;
 
             const result = await adoptionRequestsCollection
-                .find({ userEmail: email })
+                .find({
+                    $or: [
+                        { email: email },
+                        { userEmail: email }
+                    ]
+                })
                 .toArray();
 
             res.send(result);
@@ -103,16 +119,29 @@ async function run() {
         // USERS
         // =====================
 
-        app.post("/users", async (req, res) => {
-            const user = req.body;
+        const requestsCollection = db.collection("adoptionRequests");
 
-            const result = await usersCollection.insertOne(user);
+        // CREATE
+        app.post("/requests", async (req, res) => {
+            const request = {
+                ...req.body,
+                createdAt: new Date(),
+            };
 
+            const result = await requestsCollection.insertOne(request);
             res.send(result);
         });
 
+        // READ (user filter)
+        app.get("/adoption-requests", async (req, res) => {
+            const email = req.query.email;
 
+            const query = email ? { userEmail: email } : {};
 
+            const result = await requestsCollection.find(query).toArray();
+
+            res.send(result);
+        });
         await client.db("admin").command({ ping: 1 });
         console.log("MongoDB Connected 🚀");
 
