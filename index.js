@@ -27,7 +27,6 @@ async function run() {
 
         const petCollection = db.collection("pets");
         const adoptionRequestsCollection = db.collection("adoptionRequests");
-        const usersCollection = db.collection("users");
 
 
         // =====================
@@ -45,103 +44,44 @@ async function run() {
             res.send(result);
         });
 
-        // middleware
-        app.get("/pets/:id", (req, res, next) => {
-            const header = req.headers.authorization
-            if (header = loggedin) {
-                next();
-            }
-            else {
-                res.status(401).json({ maessage: "Unauthorized" })
-            }
+        app.get("/pets/:id", async (req, res) => {
+            const id = req.params.id;
 
-        },
-            async (req, res) => {
-                const id = req.params.id;
-
-                const result = await petCollection.findOne({
-                    _id: new ObjectId(id),
-                });
-
-                res.send(result);
+            const pet = await petCollection.findOne({
+                _id: new ObjectId(id),
             });
+
+            res.json(pet);
+        });
+
 
         // =====================
         // Adoption Request
         // =====================
 
-        app.post("/adoption-requests", async (req, res) => {
-            const request = {
-                ...req.body,
-                requestedDate: new Date()
-            };
 
+        app.post("/adoption-requests", async (req, res) => {
+            const request = req.body;
             const result = await adoptionRequestsCollection.insertOne(request);
             res.send(result);
         });
 
 
         app.get("/adoption-requests", async (req, res) => {
-            const result = await adoptionRequestsCollection.find().toArray();
-            res.send(result);
-        });
-
-        app.get("/adoption-requests/:email", async (req, res) => {
-            const email = req.params.email;
+            const email = req.query.email;
 
             const result = await adoptionRequestsCollection
-                .find({
-                    $or: [
-                        { email: email },
-                        { userEmail: email }
-                    ]
-                })
+                .find({ userEmail: email })
                 .toArray();
 
             res.send(result);
         });
 
-        app.delete("/adoption-requests/:id", async (req, res) => {
-
-            const id = req.params.id;
-
-            const result = await adoptionRequestsCollection.deleteOne({
-                _id: new ObjectId(id),
-            });
-
-            res.send(result);
-
-        });
 
 
 
-        // =====================
-        // USERS
-        // =====================
 
-        const requestsCollection = db.collection("adoptionRequests");
 
-        // CREATE
-        app.post("/requests", async (req, res) => {
-            const request = {
-                ...req.body,
-                createdAt: new Date(),
-            };
-
-            const result = await requestsCollection.insertOne(request);
-            res.send(result);
-        });
-
-        // READ (user filter)
-        app.get("/adoption-requests", async (req, res) => {
-            const email = req.query.email;
-
-            const query = email ? { userEmail: email } : {};
-
-            const result = await requestsCollection.find(query).toArray();
-
-            res.send(result);
-        });
         await client.db("admin").command({ ping: 1 });
         console.log("MongoDB Connected 🚀");
 
