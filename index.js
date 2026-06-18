@@ -72,6 +72,18 @@ async function run() {
 
 
 
+
+        app.delete("/pets/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const result = await petCollection.deleteOne({
+                _id: new ObjectId(id),
+            });
+
+            res.json(result);
+        });
+
+
         // =====================
         // Adoption Request
         // =====================
