@@ -153,6 +153,66 @@ async function run() {
             res.send(result);
         });
 
+
+
+
+        app.get("/my-requests", async (req, res) => {
+            const email = req.query.email;
+
+            const result = await adoptionRequestsCollection
+                .find({ userEmail: email })
+                .toArray();
+
+            res.send(result);
+        });
+
+
+
+
+
+        app.get("/owner-requests", async (req, res) => {
+            const email = req.query.email;
+
+            const result = await adoptionRequestsCollection
+                .find({ ownerEmail: email })
+                .toArray();
+
+            res.send(result);
+        });
+
+
+
+
+        app.patch("/adoption-requests/:id/status", async (req, res) => {
+            const { id } = req.params;
+            const { status, petId } = req.body;
+
+            const result = await adoptionRequestsCollection.updateOne(
+                { _id: new ObjectId(id) },
+                {
+                    $set: { status },
+                }
+            );
+
+            if (status === "Approved") {
+                await petCollection.updateOne(
+                    { _id: new ObjectId(petId) },
+                    {
+                        $set: {
+                            adopted: true,
+                        },
+                    }
+                );
+            }
+
+            res.send(result);
+        });
+
+
+
+
+
+
         await client.db("admin").command({ ping: 1 });
         console.log("MongoDB Connected 🚀");
 
