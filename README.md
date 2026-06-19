@@ -3,8 +3,7 @@
 REST API backend for the PetHome pet adoption platform. Built with Express and MongoDB.
 
 ## Live URL
-
-https://pethome-api.onrender.com
+https://assignment-09-backend.vercel.app/
 
 ## Features
 
