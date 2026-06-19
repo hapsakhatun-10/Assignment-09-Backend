@@ -40,8 +40,29 @@ async function run() {
         });
 
         app.get("/pets", async (req, res) => {
-            const result = await petCollection.find().toArray();
-            res.send(result);
+            const search = req.query.search;
+            const species = req.query.species;
+
+            const query = {};
+
+            if (search) {
+                query.petName = {
+                    $regex: search,
+                    $options: "i",
+                };
+            }
+
+            if (species) {
+                query.species = {
+                    $in: [species],
+                };
+            }
+
+            const pets = await petCollection.find(query).toArray();
+
+            res.send(pets);
+
+
         });
 
         app.get("/pets/:id", async (req, res) => {
@@ -82,6 +103,7 @@ async function run() {
 
             res.json(result);
         });
+
 
 
         // =====================
