@@ -42,7 +42,6 @@ const verifyToken = async (req, res, next) => {
 
 async function run() {
     try {
-        await client.connect();
 
         const db = client.db("pethome");
 
@@ -201,8 +200,6 @@ async function run() {
             res.send(result);
         });
 
-        await client.db("admin").command({ ping: 1 });
-        console.log("MongoDB Connected 🚀");
 
     } catch (error) {
         console.log("DB Error:", error);
