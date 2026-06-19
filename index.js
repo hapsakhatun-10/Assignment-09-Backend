@@ -64,7 +64,6 @@ async function run() {
 
 
         });
-
         app.get("/pets/:id", async (req, res) => {
             const id = req.params.id;
 
@@ -74,6 +73,10 @@ async function run() {
 
             res.json(pet);
         });
+
+
+
+
 
 
         app.patch("/pets/:id", async (req, res) => {
@@ -130,8 +133,25 @@ async function run() {
 
 
 
+        app.get("/my-listings/:email", async (req, res) => {
+            const email = req.params.email;
+
+            const result = await petCollection.find({ ownerEmail: email }).toArray();
+
+            res.send(result);
+        });
 
 
+
+        app.delete("/adoption-requests/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const result = await adoptionRequestsCollection.deleteOne({
+                _id: new ObjectId(id),
+            });
+
+            res.send(result);
+        });
 
         await client.db("admin").command({ ping: 1 });
         console.log("MongoDB Connected 🚀");
